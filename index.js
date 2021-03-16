@@ -3,12 +3,13 @@ const app = express();
 const mongoose = require('mongoose');
 //const bodyParser = require('body-parser'); // express 최신 버전에서는 더이상 필요 없음
 const cookieParser = require('cookie-parser');
+// 환경별 config 값
+const config = require('./config/key');
 
 const {User} = require('./models/user');
 
 // db 연결
-mongoose.connect('mongodb+srv://hyun:qwe1asd@boilerplate.yl0ea.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-    , {useNewUrlParser: true})
+mongoose.connect( config.mongoURI, {useNewUrlParser: true})
     .then(() => console.log('DB Connected'))
     .catch(err => console.error(err));
 
