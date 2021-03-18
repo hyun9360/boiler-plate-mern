@@ -3,8 +3,7 @@ const app = express();
 const models = require('./models/index')
 const bodyParser = require('body-parser'); // express 최신 버전에서는 더이상 필요 없음
 const cookieParser = require('cookie-parser');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+
 
 /*models.sequelize.sync().then(() => {
     console.log('DB Connected')
@@ -27,29 +26,76 @@ app.post('/api/users/register', (req, res) => {
 
     let body = req.body;
 
-    bcrypt.genSalt(saltRounds, function (err, salt) {
-        if (err) return res.json({success: false, err});
-
-        bcrypt.hash(body.password, salt, function (err, hash) {
-            if (err) return res.json({success: false, err});
-
-            // 암호화 성공 시 insert
-            models.User.create({
-                email: body.email,
-                name: body.name,
-                lastname: body.lastname,
-                password: hash
-            })
-                .then(result => {
-                    res.status(200).json({success: true, userData: result})
-                })
-                .catch(err => {
-                    res.json({success: false, err})
-                })
+    models.User.generatePassword(body.password).then(result => {
+        // 암호화 성공 시 insert
+        models.User.create({
+            email: body.email,
+            name: body.name,
+            lastname: body.lastname,
+            password: result
         })
+            .then(result => {
+                res.status(200).json({success: true, userData: result})
+            })
+            .catch(err => {
+                res.json({success: false, err})
+            })
+    }).catch(err => {
+        res.json({success: false, err})
     })
+
 
 })
 
+function generateToken(user, cb) {
+    // var token = jwt.sign(user.id, 'secret')
+    //
+    // console.log("token : ", token)
+
+
+}
+
+app.post('/api/users/login', (req, res) => {
+
+    // find the email
+    models.User.findOne({
+        where: {
+            email: req.body.email
+        }
+    })
+        .then(userInfo => {
+            // compare Password
+            models.User.comparePassword(req.body.password, userInfo.password, (err, isMatch) => {
+
+                if (!isMatch) return res.json({loginSuccess: false, message: "wrong password"})
+                // generate Token
+                let token = models.User.generateToken(userInfo.id)
+
+                models.User.update(
+                    {
+                        token: token
+                    },
+                    {
+                        where: {id: userInfo.id}
+                    })
+                    .then(result => {
+                        // console.log('login success : ' + result)
+                        res.cookie('x_auth', token)
+                            .status(200)
+                            .json({
+                                loginSuccess: true
+                            })
+                    })
+                    .catch(err => {
+                        res.status(400).send(err)
+                    });
+            })
+        })
+        .catch(err => {
+            res.json({loginSuccess: false, message: "Auth failed, email not found", err})
+        })
+
+
+})
 
 app.listen(5000);
