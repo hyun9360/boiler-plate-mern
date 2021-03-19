@@ -3,6 +3,7 @@ const app = express();
 const models = require('./models/index')
 const bodyParser = require('body-parser'); // express 최신 버전에서는 더이상 필요 없음
 const cookieParser = require('cookie-parser');
+const {auth} = require('./middleware/auth')
 
 
 /*models.sequelize.sync().then(() => {
@@ -11,16 +12,27 @@ const cookieParser = require('cookie-parser');
     console.log('Error', err)
 })*/
 
-app.get('/', (req, res) => {
+/*app.get('/', (req, res) => {
     models.User.findAll().then(result => {
         res.json(result)
     })
-})
+})*/
 
 // body , cookie 정보 받기
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(cookieParser())
+
+app.get('/api/users/auth', auth, (req, res) => {
+    res.status(200).json({
+        id : req.id,
+        isAuth : true,
+        email : req.user.email,
+        name : req.user.name,
+        lastname : req.user.lastname,
+        role : req.user.role
+    })
+})
 
 app.post('/api/users/register', (req, res) => {
 
@@ -46,14 +58,6 @@ app.post('/api/users/register', (req, res) => {
 
 
 })
-
-function generateToken(user, cb) {
-    // var token = jwt.sign(user.id, 'secret')
-    //
-    // console.log("token : ", token)
-
-
-}
 
 app.post('/api/users/login', (req, res) => {
 

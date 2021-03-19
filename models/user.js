@@ -28,6 +28,25 @@ module.exports = (sequelize, DataTypes) => {
       return jwt.sign(id, 'secret')
     }
 
+    static findByToken(token, cb) {
+      jwt.verify(token, 'secret', function(err, decode) {
+        if(err) return cb(err)
+
+        User.findOne({
+          where : {
+            id : decode,
+            token : token
+          }
+        }).then(userInfo => {
+          cb(null, userInfo)
+        }).catch(err => {
+          return cb(err)
+        })
+      })
+
+      return cb
+    }
+
     static associate(models) {
       // define association here
     }
