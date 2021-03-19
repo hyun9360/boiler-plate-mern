@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const models = require('./models/index')
+const models = require('./models')
 const bodyParser = require('body-parser'); // express 최신 버전에서는 더이상 필요 없음
 const cookieParser = require('cookie-parser');
 const {auth} = require('./middleware/auth')
