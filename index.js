@@ -25,17 +25,16 @@ app.use(cookieParser())
 
 app.get('/api/users/auth', auth, (req, res) => {
     res.status(200).json({
-        id : req.id,
-        isAuth : true,
-        email : req.user.email,
-        name : req.user.name,
-        lastname : req.user.lastname,
-        role : req.user.role
+        id: req.user.id,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role
     })
 })
 
 app.post('/api/users/register', (req, res) => {
-
     let body = req.body;
 
     models.User.generatePassword(body.password).then(result => {
@@ -55,12 +54,9 @@ app.post('/api/users/register', (req, res) => {
     }).catch(err => {
         res.json({success: false, err})
     })
-
-
 })
 
 app.post('/api/users/login', (req, res) => {
-
     // find the email
     models.User.findOne({
         where: {
@@ -98,8 +94,19 @@ app.post('/api/users/login', (req, res) => {
         .catch(err => {
             res.json({loginSuccess: false, message: "Auth failed, email not found", err})
         })
+})
 
-
+app.get('/api/users/logout', auth, (req, res) => {
+    models.User.update(
+        {token: ""}
+        , {where: {id: req.user.id}}
+    )
+        .then(result => {
+            res.status(200).json({success: true})
+        })
+        .catch(err => {
+            res.json({success: false, err})
+        })
 })
 
 app.listen(5000);
