@@ -1,8 +1,12 @@
+import {Route, Switch} from 'react-router-dom'
+import About from "./about";
 
 function App() {
   return (
-    <div className="App">
-      Hello ~
+    <div>
+      <Switch>
+          <Route path='/about' component={About} />
+      </Switch>
     </div>
   );
 }
