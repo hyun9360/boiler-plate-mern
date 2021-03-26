@@ -14,6 +14,7 @@ app.use(bodyParser.json())
 app.use(cookieParser())
 
 app.use('/api/users', require('./routes/users'));
+app.use('/api/dialogflow', require('./routes/dialogflow'));
 
 app.use('/uploads', express.static('uploads'));
 
